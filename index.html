@@ -256,13 +256,23 @@
             left: 20px;
             z-index: 1000;
             background-color: white;
-            padding:10px;
+            padding: 10px;
+        }
+
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
         }
     </style>
 </head>
 
 <body>
     <!-- <nav id="menu"></nav> -->
+    <div id="info"></div>
     <div id="filters"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
@@ -278,6 +288,7 @@
 
         const GEO = [];
         const filters = document.getElementById("filters")
+        const info = document.getElementById("info")
         const mainData = [];
         const colors = ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"];
 
@@ -409,6 +420,8 @@
                     .setLngLat(coordinates)
                     .setHTML(description)
                     .addTo(map);
+
+                info.innerHTML = description;
             });
 
             d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vsAps12s1plHn9UdEpziSP-GbspdhUn7NoAhoJSeYkDcXv2ic_LXfbCfqrEh3w/pub?gid=227206475&single=true&output=csv")
@@ -527,7 +540,7 @@
 
             autocomplete(document.getElementById("myInput"), mainData);
 
-            
+
         }
 
         function buildFilters(data) {
@@ -553,10 +566,10 @@
             console.log('resiIntervals', resiIntervals);
 
             filters.innerHTML = `
-                <h3>Area</h3>
+                <h3>Area resi</h3>
                 ${rI}
                 <br>
-                <h3>Units</h3>
+                <h3>Number of units</h3>
                 ${uI}
             `;
         }
@@ -572,7 +585,7 @@
                 .filter(i => {
                     if (rFilter) {
                         rf = rFilter.value.split(";")
-                        const val = +i['area resi'].replace(",",".")
+                        const val = +i['area resi'].replace(",", ".")
                         return val >= rf[0] && val <= rf[1];
                     }
                     return i
@@ -580,7 +593,7 @@
                 .filter(i => {
                     if (uFilter) {
                         uf = uFilter.value.split(";")
-                        const val = +i['Number of units total'].replace(",",".")
+                        const val = +i['Number of units total'].replace(",", ".")
                         return val >= uf[0] && val <= uf[1];
                     }
                     return i
