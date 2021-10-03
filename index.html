@@ -157,10 +157,11 @@
             display: inline-block;
             top: 20px;
             left: 20px;
+
         }
 
         input {
-            border: 1px solid transparent;
+            border: 1px solid gray;
             background-color: #f1f1f1;
             padding: 10px;
             font-size: 16px;
@@ -207,18 +208,6 @@
             color: #ffffff;
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
         #menu {
             background: #fff;
             position: absolute;
@@ -260,25 +249,35 @@
         #menu a.active:hover {
             background: #3074a4;
         }
+
+        #filters {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            z-index: 1000;
+            background-color: white;
+            padding:10px;
+        }
     </style>
 </head>
 
 <body>
-    <nav id="menu"></nav>
+    <!-- <nav id="menu"></nav> -->
+    <div id="filters"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
         <input id="myInput" type="text" name="myCountry" placeholder="Søk...">
     </div>
-    <div id="logo">
+    <!-- <div id="logo">
         <img src="img/Conveyor_white_300px.png" alt="">
-    </div>
+    </div> -->
 
 
 
     <script>
 
         const GEO = [];
-
+        const filters = document.getElementById("filters")
         const mainData = [];
         const colors = ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"];
 
@@ -292,10 +291,48 @@
 
         map.on('load', () => {
 
+            map.addSource('big', {
+                'type': 'geojson',
+                'data': {
+                    type: "FeatureCollection",
+                    features: []
+                }
+            });
+            map.addLayer({
+                'id': 'Kommuner',
+                'type': 'fill',
+                'source': 'big', // reference the data source
+                'layout': {
+                    // Make the layer visible by default.
+                    'visibility': 'visible'
+                },
+                'paint': {
+                    'fill-color': ['get', 'color'],
+                    'fill-opacity': 0.3
+                }
+            });
 
+            map.addSource('small', {
+                type: 'geojson',
+                'data': {
+                    type: "FeatureCollection",
+                    features: []
+                }
+            });
+            map.addLayer({
+                'id': 'Fylker',
+                'type': 'fill',
+                'source': 'small', // reference the data source
+                'layout': {
+                    // Make the layer visible by default.
+                    'visibility': 'visible'
+                },
+                'paint': {
+                    'fill-color': ['get', 'color'],
+                    'fill-opacity': 0.3
+                }
+            });
 
-
-        
 
             map.addSource('pins', {
                 'type': 'geojson',
@@ -350,17 +387,16 @@
                 var coordinates = e.features[0].geometry.coordinates.slice();
                 var data = e.features[0].properties;
 
-                let img = '';
-                if (data.picture !== "") {
-                    img = `<div><img src="${data.picture}" style="width:200px;"></div>`;
-                }
-                const name = data['bygningsnavn'];
+
+
                 const description = `
-                    <h1>${name}</h1>
-                    ${img}
-                    <div><b>Se i 3D</b>: <a href="${data['model url']}">${name}</a></div>
-                    <div><b>Vernestatus</b>:      ${data['vernestatus']}</div>
-                    <div><b>Kirkesøk</b>: <a href="${data['nettside']}">${name}</a></div>
+                    <h1>${data['Adress']}</h1>
+                    <div><b>Number of units total</b>: ${data['Number of units total']}</div>
+                    <div><b>Number of resi </b>: ${data["number of resi "]}</div>
+                    <div><b>number of commercial</b>: ${data['number of commercial']}</div>
+                    <div><b>area total</b>: ${data['area total']}</div>
+                    <div><b>area resi</b>: ${data['area resi']}</div>
+                    <div><b>area commercial</b>: ${data['area commercial']}</div>
                 `;
                 // Ensure that if the map is zoomed out such that multiple
                 // copies of the feature are visible, the popup appears
@@ -378,12 +414,12 @@
             d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vsAps12s1plHn9UdEpziSP-GbspdhUn7NoAhoJSeYkDcXv2ic_LXfbCfqrEh3w/pub?gid=227206475&single=true&output=csv")
                 .then(data => {
                     showPins(data);
+                    buildFilters(data)
                 })
         })
 
 
-
-        // After the last frame rendered before the map enters an "idle" state.
+        /*
         map.on('idle', function () {
             // If these two layers have been added to the style,
             // add the toggle buttons.
@@ -435,6 +471,7 @@
                 }
             }
         });
+        */
 
         function mouseEnter() {
             map.getCanvas().style.cursor = 'pointer';
@@ -455,7 +492,7 @@
                 for (let index = 0; index < array.length; index++) {
                     const i = array[index];
                     const e = `${i['Adress']} , ${i['post code']}, ${i['Ort']} `;
-                    await fetch(`https://maps.googleapis.com/maps/api/geocode/json?&address=${e}&key=AIzaSyBp-KENPTyxEQowvB8r0z9a_J_nd_tJR3w`)
+                    await fetch(`https://maps.googleapis.com/maps/api/geocode/json?&address=${e}&key=`)
                         .then(i => i.json())
                         .then(res => {
                             console.log('results', res);
@@ -474,6 +511,8 @@
             */
 
             collection = data.filter(i => i.lat !== "").map(d => {
+
+                d.search = d.Adress
                 mainData.push(d)
                 return {
                     "type": "Feature",
@@ -486,10 +525,70 @@
             console.log('collection', collection);
             map.getSource('pins').setData({ type: "FeatureCollection", features: collection })
 
-
             autocomplete(document.getElementById("myInput"), mainData);
+
+            
         }
 
+        function buildFilters(data) {
+
+            let rI = '';
+            let uI = '';
+            const resiIntervals = Math.ceil(Math.max(...data.map(i => +i['area resi'].replace(",", "."))) / 1000)
+            for (let i = 0; i <= resiIntervals; i++) {
+                rI += `<div>
+                    <input type="radio" name="resi" id="resi_${i}"  oninput="update()"  value="${i * 1000 + 1};${(i + 1) * 1000}">
+                    <label for="resi_${i}">${i * 1000 + 1} - ${(i + 1) * 1000} </label>
+                </div>`
+            }
+
+            const unitsIntervals = Math.ceil(Math.max(...data.map(i => +i['Number of units total'].replace(",", "."))) / 10)
+            for (let i = 0; i <= unitsIntervals; i++) {
+                uI += `<div>
+                    <input type="radio" name="units" id="units_${i}" oninput="update()" value="${i * 10 + 1};${(i + 1) * 10}">
+                    <label for="units_${i}">${i * 10 + 1} - ${(i + 1) * 10} </label>
+                </div>`
+            }
+
+            console.log('resiIntervals', resiIntervals);
+
+            filters.innerHTML = `
+                <h3>Area</h3>
+                ${rI}
+                <br>
+                <h3>Units</h3>
+                ${uI}
+            `;
+        }
+
+        function update() {
+            const rFilter = document.querySelector("input[name='resi']:checked");
+            const uFilter = document.querySelector("input[name='units']:checked");
+
+            console.log('rFilter', rFilter);
+            console.log('uFilter', uFilter);
+
+            const data = mainData
+                .filter(i => {
+                    if (rFilter) {
+                        rf = rFilter.value.split(";")
+                        const val = +i['area resi'].replace(",",".")
+                        return val >= rf[0] && val <= rf[1];
+                    }
+                    return i
+                })
+                .filter(i => {
+                    if (uFilter) {
+                        uf = uFilter.value.split(";")
+                        const val = +i['Number of units total'].replace(",",".")
+                        return val >= uf[0] && val <= uf[1];
+                    }
+                    return i
+                })
+
+            console.log('data', data);
+            showPins(data);
+        }
 
 
 
@@ -512,7 +611,7 @@
                 this.parentNode.appendChild(a);
 
 
-                const arr = data.map(i => i.bygningsnavn)
+                const arr = data.map(i => i.search)
                 let counter = 0;
 
                 /*for each item in the array...*/
@@ -537,23 +636,23 @@
 
                             console.log('inp.value', inp.value);
 
-                            const point = data.find(i => i.bygningsnavn === inp.value);
+                            const point = data.find(i => i.search === inp.value);
                             if (point) {
                                 map.flyTo({
-                                    center: [+point.lon, +point.lat],
+                                    center: [+point.lng, +point.lat],
                                     zoom: 13
                                 })
 
                                 map.setFilter('labels', [
                                     'match',
-                                    ['get', 'bygningsnavn'],
+                                    ['get', 'search'],
                                     inp.value,
                                     true,
                                     false
                                 ])
                                 map.setFilter('selected', [
                                     'match',
-                                    ['get', 'bygningsnavn'],
+                                    ['get', 'search'],
                                     inp.value,
                                     true,
                                     false
@@ -564,12 +663,12 @@
                                     var mapBounds = map.getBounds()
                                     const query = map.queryRenderedFeatures([map.project(mapBounds.getSouthWest()), map.project(mapBounds.getNorthEast())], { layers: ['pins'] });
 
-                                    const names = [...new Set(query.map(i => i.properties.bygningsnavn))]
+                                    const names = [...new Set(query.map(i => i.properties.search))]
 
                                     console.log('names', names);
                                     map.setFilter('labels', [
                                         'match',
-                                        ['get', 'bygningsnavn'],
+                                        ['get', 'search'],
                                         names,
                                         true,
                                         false
