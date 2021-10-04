@@ -490,12 +490,10 @@
                 var coordinates = e.features[0].geometry.coordinates.slice();
                 var data = e.features[0].properties;
 
-
-
                 const description = `
                     <h1>${data['Adress']}</h1>
                     <div><b>Number of units total</b>: ${data['Number of units total']}</div>
-                    <div><b>Number of resi </b>: ${data["number of resi "]}</div>
+                    <div><b>Number of resi </b>: <span style="color:orange">${data["number of resi "]}</a></div>
                     <div><b>number of commercial</b>: ${data['number of commercial']}</div>
                     <div><b>area total</b>: ${data['area total']}</div>
                     <div><b>area resi</b>: ${data['area resi']}</div>
@@ -755,6 +753,21 @@
 
                             const point = data.find(i => i.search === inp.value);
                             if (point) {
+
+
+                                const description = `
+                                    <h1>${point['Adress']}</h1>
+                                    <div><b>Number of units total</b>: ${point['Number of units total']}</div>
+                                    <div><b>Number of resi </b>: <span style="color:orange">${point["number of resi "]}</a></div>
+                                    <div><b>number of commercial</b>: ${point['number of commercial']}</div>
+                                    <div><b>area total</b>: ${point['area total']}</div>
+                                    <div><b>area resi</b>: ${point['area resi']}</div>
+                                    <div><b>area commercial</b>: ${point['area commercial']}</div>
+                                `;
+                                info.innerHTML = description;
+                                openNav()
+
+
                                 map.flyTo({
                                     center: [+point.lng, +point.lat],
                                     zoom: 13
