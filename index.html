@@ -260,19 +260,74 @@
         }
 
         #info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-            background-color: white;
+
             padding: 10px;
+        }
+
+
+
+
+
+
+
+
+
+        .sidenav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            right: 0;
+            background-color: white;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidenav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidenav {
+                padding-top: 15px;
+            }
+
+            .sidenav a {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 
 <body>
+
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="info"></div>
+    </div>
+
+
     <!-- <nav id="menu"></nav> -->
-    <div id="info"></div>
+
     <div id="filters"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
@@ -416,12 +471,13 @@
                     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                 }
 
-                new mapboxgl.Popup()
-                    .setLngLat(coordinates)
-                    .setHTML(description)
-                    .addTo(map);
+                // new mapboxgl.Popup()
+                //     .setLngLat(coordinates)
+                //     .setHTML(description)
+                //     .addTo(map);
 
                 info.innerHTML = description;
+                openNav()
             });
 
             d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vsAps12s1plHn9UdEpziSP-GbspdhUn7NoAhoJSeYkDcXv2ic_LXfbCfqrEh3w/pub?gid=227206475&single=true&output=csv")
@@ -569,7 +625,7 @@
                 <br>
                 <h3>Number of units</h3>
                 ${uI}
-            `; 
+            `;
         }
 
         function update() {
@@ -753,7 +809,13 @@
             });
         }
 
+        function openNav() {
+            document.getElementById("mySidenav").style.width = "300px";
+        }
 
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+        }
     </script>
 
 </body>
