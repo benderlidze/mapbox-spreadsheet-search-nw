@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -647,18 +648,33 @@
 
             const unitsIntervals = Math.ceil(Math.max(...data.map(i => +i['Number of units total'].replace(",", "."))) / 10)
             for (let i = 0; i <= unitsIntervals; i++) {
+
+                const number = mainData.filter(s => {
+                    const val = +s['Number of units total'].replace(",", ".")
+                    return val >= (i * 10 + 1) && val <= ((i + 1) * 10)
+                }).length;
+
+                let num = `(${number})`;
+                if (number === 0) {
+                    num = `<span style="color:#d5d5d5">(${number})</span>`;
+                }
+
                 uI += `<div>
                     <input type="radio" name="units" id="units_${i}" oninput="update()" value="${i * 10 + 1};${(i + 1) * 10}">
-                    <label for="units_${i}">${i * 10 + 1} - ${(i + 1) * 10} </label>
+                    <label for="units_${i}">${i * 10 + 1} - ${(i + 1) * 10} ${num}</label>
                 </div>`
             }
 
             console.log('resiIntervals', resiIntervals);
 
+            // filters.innerHTML = `
+            //     <h3>Area resi</h3>
+            //     ${rI}
+            //     <br>
+            //     <h3>Number of units</h3>
+            //     ${uI}
+            // `;
             filters.innerHTML = `
-                <h3>Area resi</h3>
-                ${rI}
-                <br>
                 <h3>Number of units</h3>
                 ${uI}
             `;
@@ -672,14 +688,14 @@
             console.log('uFilter', uFilter);
 
             const data = mainData
-                .filter(i => {
-                    if (rFilter) {
-                        rf = rFilter.value.split(";")
-                        const val = +i['area resi'].replace(",", ".")
-                        return val >= rf[0] && val <= rf[1];
-                    }
-                    return i
-                })
+                // .filter(i => {
+                //     if (rFilter) {
+                //         rf = rFilter.value.split(";")
+                //         const val = +i['area resi'].replace(",", ".")
+                //         return val >= rf[0] && val <= rf[1];
+                //     }
+                //     return i
+                // })
                 .filter(i => {
                     if (uFilter) {
                         uf = uFilter.value.split(";")
@@ -852,4 +868,5 @@
         }
     </script>
 </body>
+
 </html>
