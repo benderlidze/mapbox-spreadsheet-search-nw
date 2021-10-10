@@ -340,9 +340,19 @@
             background-color: white;
             padding: 10px;
         }
+
         #berlinLyaerToggle {
             position: absolute;
             bottom: 65px;
+            left: 5px;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
+        }
+
+        #resetButton {
+            position: absolute;
+            bottom: 125px;
             left: 5px;
             z-index: 1000;
             background-color: white;
@@ -357,6 +367,7 @@
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <div id="info"></div>
     </div>
+    <button class="button" id="resetButton">Reset</button>
     <button class="button" id="berlinLyaerToggle">Berlin layer</button>
 
     <div id="leftBottom"></div>
@@ -641,6 +652,19 @@
                 }
             })
         }
+
+        resetButton.addEventListener("click", () => {
+            console.log('reset');
+            map.flyTo({
+                center: { lng: 13.404215965595967, lat: 52.50403625638327 },
+                zoom: 9.4
+            })
+            closeNav();
+
+            buildFilters(mainData);
+            showPins(mainData);
+            map.setFilter('selected', ["==", ['get', "Adress"], null]);
+        })
 
         berlinLyaerToggle.addEventListener("click", () => {
             console.log('map.getLayer("berlin").visibility', map.getLayer("berlin").visibility);
