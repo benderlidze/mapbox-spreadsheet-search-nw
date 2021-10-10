@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
     <style>
@@ -20,9 +20,13 @@
             padding: 0;
             margin: 0;
             color: #2f2f2f;
-            display: block;
             font-weight: bold;
             font: 20px Helvetica Neue, Arial, Helvetica, sans-serif;
+
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .map-overlay {
@@ -252,25 +256,19 @@
 
         #filters {
             position: absolute;
-            top: 70px;
+            top: 120px;
             left: 20px;
             z-index: 1000;
             background-color: white;
             padding: 10px;
+            transition: 0.5s;
+            height: 350px;
+            overflow: hidden;
         }
 
         #info {
-
             padding: 10px;
         }
-
-
-
-
-
-
-
-
 
         .sidenav {
             height: 100%;
@@ -315,6 +313,24 @@
                 font-size: 18px;
             }
         }
+
+        .button {
+            margin: 10px 0px;
+        }
+
+
+        .arrow {
+            border: solid black;
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 3px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: 0.5s;
+
+            transform: rotate(-135deg);
+            -webkit-transform: rotate(-135deg);
+        }
     </style>
 </head>
 
@@ -325,23 +341,19 @@
         <div id="info"></div>
     </div>
 
-
-    <!-- <nav id="menu"></nav> -->
-
-    <div id="filters"></div>
+    <div id="filters" style="height:350px;"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
+        <button class="button" id="berlinLyaerToggle">Berlin layer</button>
         <input id="myInput" type="text" name="myCountry" placeholder="Søk...">
     </div>
-    <!-- <div id="logo">
-        <img src="img/Conveyor_white_300px.png" alt="">
-    </div> -->
-
-
+    <div id="logo">
+        <img src="img/wieso_hvit.png" alt="">
+    </div>
 
     <script>
-
         const GEO = [];
+        const berlinLyaerToggle = document.getElementById("berlinLyaerToggle")
         const filters = document.getElementById("filters")
         const info = document.getElementById("info")
         const mainData = [];
@@ -393,6 +405,40 @@
                 }
             },
             );
+
+            map.addSource('berlin', {
+                type: 'geojson',
+                // Use a URL for the value for the `data` property.
+                data: 'data/berlin.geojson'
+            });
+            // map.addLayer({
+            //     'id': 'berlin',
+            //     'type': 'fill',
+            //     'source': 'berlin', // reference the data source
+            //     'layout': {
+            //         // Make the layer visible by default.
+            //         'visibility': 'visible'
+            //     },
+            //     'paint': {
+            //         'fill-color': "white",
+            //         'fill-opacity': 0.1,
+
+            //     }
+            // });
+            map.addLayer({
+                'id': 'berlin',
+                'type': 'line',
+                'source': 'berlin',
+                'layout': {
+                    'visibility': "visible"
+                },
+                'paint': {
+                    'line-color': 'gray',
+                    'line-width': 2
+                },
+            });
+
+
 
             map.addSource('big', {
                 'type': 'geojson',
@@ -476,7 +522,7 @@
                 'source': 'pins',
                 'paint': {
                     'circle-radius': 5,
-                    'circle-color': 'red',
+                    'circle-color': ['get', 'color'],
                     'circle-opacity': 1
                 }
             });
@@ -498,6 +544,12 @@
                     <div><b>area total</b>: ${data['area total']}</div>
                     <div><b>area resi</b>: ${data['area resi']}</div>
                     <div><b>area commercial</b>: ${data['area commercial']}</div>
+
+                    <h2>Scan information</h2>
+                    <div><b>Scan Date</b>: ${data['Scan Date']}</div>
+                    <div><b>Scan Week</b>: ${data['Scan Week']}</div>
+                    <div><b>Scan Team</b>: ${data['Scan Team']}</div>
+                    <div><b>scanned resi vs. resi</b>: ${data['scanned resi vs. resi']}</div>
                 `;
                 // Ensure that if the map is zoomed out such that multiple
                 // copies of the feature are visible, the popup appears
@@ -513,6 +565,8 @@
 
                 info.innerHTML = description;
                 openNav()
+
+                highlightFilterRow(data["number of resi "])
             });
 
             d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vsAps12s1plHn9UdEpziSP-GbspdhUn7NoAhoJSeYkDcXv2ic_LXfbCfqrEh3w/pub?gid=227206475&single=true&output=csv")
@@ -523,59 +577,47 @@
         })
 
 
-        /*
-        map.on('idle', function () {
-            // If these two layers have been added to the style,
-            // add the toggle buttons.
-            if (map.getLayer('Kommuner') && map.getLayer('Fylker')) {
-                // Enumerate ids of the layers.
-                var toggleableLayerIds = ['Kommuner', 'Fylker'];
-                // Set up the corresponding toggle button for each layer.
-                for (var i = 0; i < toggleableLayerIds.length; i++) {
-                    var id = toggleableLayerIds[i];
-                    if (!document.getElementById(id)) {
-                        // Create a link.
-                        var link = document.createElement('a');
-                        link.id = id;
-                        link.href = '#';
-                        link.textContent = id;
-                        link.className = 'active';
-                        // Show or hide layer when the toggle is clicked.
-                        link.onclick = function (e) {
-                            var clickedLayer = this.textContent;
-                            e.preventDefault();
-                            e.stopPropagation();
+        document.addEventListener("click", e => {
 
-                            var visibility = map.getLayoutProperty(
-                                clickedLayer,
-                                'visibility'
-                            );
+            if (e.target.id === "toggleFilters") {
+                const arrow = e.target;
+                console.log('e.target', e.target);
+                if (filters.style.height === "350px") {
+                    filters.style.height = "16px"
+                    arrow.style.transform = "rotate(45deg)";
+                } else {
+                    filters.style.height = "350px";
+                    arrow.style.transform = "rotate(-135deg)";
 
-                            // Toggle layer visibility by changing the layout object's visibility property.
-                            if (visibility === 'visible') {
-                                map.setLayoutProperty(
-                                    clickedLayer,
-                                    'visibility',
-                                    'none'
-                                );
-                                this.className = '';
-                            } else {
-                                this.className = 'active';
-                                map.setLayoutProperty(
-                                    clickedLayer,
-                                    'visibility',
-                                    'visible'
-                                );
-                            }
-                        };
-
-                        var layers = document.getElementById('menu');
-                        layers.appendChild(link);
-                    }
                 }
             }
-        });
-        */
+
+        })
+
+        function highlightFilterRow(number) {
+            console.log('resi', number);
+            [...document.querySelectorAll(".resi")].forEach(i => {
+                const from = +i.getAttribute("from")
+                const to = +i.getAttribute("to")
+                if (number >= from && number <= to) {
+                    i.style.backgroundColor = "yellow"
+                } else {
+                    i.style.backgroundColor = "white"
+                }
+            })
+        }
+
+        berlinLyaerToggle.addEventListener("click", () => {
+            console.log('map.getLayer("berlin").visibility', map.getLayer("berlin").visibility);
+            if (map.getLayer("berlin").visibility === "visible") {
+                map.setLayoutProperty('berlin', 'visibility', 'none');
+            }
+            else {
+                map.setLayoutProperty('berlin', 'visibility', 'visible');
+            }
+        })
+
+
 
         function mouseEnter() {
             map.getCanvas().style.cursor = 'pointer';
@@ -587,41 +629,18 @@
         function showPins(data) {
 
             console.log('data', data);
-
-
-            /*
-            (async () => {
-
-                const array = data;
-                for (let index = 0; index < array.length; index++) {
-                    const i = array[index];
-                    const e = `${i['Adress']} , ${i['post code']}, ${i['Ort']} `;
-                    await fetch(`https://maps.googleapis.com/maps/api/geocode/json?&address=${e}&key=`)
-                        .then(i => i.json())
-                        .then(res => {
-                            console.log('results', res);
-                            GEO.push({
-                                "buyer_postal_code": e,
-                                "geocoded": res
-                            })
-                            if(res.status!=="OK") return;
-                            array[index]['lat'] = res.results[0].geometry.location.lat;
-                            array[index]['lng'] = res.results[0].geometry.location.lng;
-                        })
-                }
-
-                console.log('array',array);
-            })();
-            */
-
             collection = data.filter(i => i.lat !== "").map(d => {
 
                 d.search = d.Adress
                 mainData.push(d)
+
+                let color = (+d['Scan finished 1= Yes 0= No'] === 1) ? 'green' : 'red';
+
                 return {
                     "type": "Feature",
                     "geometry": { "type": "Point", "coordinates": [+d['lng'], +d['lat']] },
                     "properties": {
+                        color,
                         ...d
                     },
                 }
@@ -644,11 +663,11 @@
                 </div>`
             }
 
-            const unitsIntervals = Math.ceil(Math.max(...data.map(i => +i['Number of units total'].replace(",", "."))) / 10)
+            const unitsIntervals = Math.ceil(Math.max(...data.map(i => +i['number of resi '].replace(",", "."))) / 10)
             for (let i = 0; i <= unitsIntervals; i++) {
 
                 const number = mainData.filter(s => {
-                    const val = +s['Number of units total'].replace(",", ".")
+                    const val = +s['number of resi '].replace(",", ".")
                     return val >= (i * 10 + 1) && val <= ((i + 1) * 10)
                 }).length;
 
@@ -657,24 +676,27 @@
                     num = `<span style="color:#d5d5d5">(${number})</span>`;
                 }
 
-                uI += `<div>
+                uI += `<div class="resi" from="${i * 10 + 1}" to="${(i + 1) * 10}" >
                     <input type="radio" name="units" id="units_${i}" oninput="update()" value="${i * 10 + 1};${(i + 1) * 10}">
                     <label for="units_${i}">${i * 10 + 1} - ${(i + 1) * 10} ${num}</label>
                 </div>`
+
             }
 
-            console.log('resiIntervals', resiIntervals);
+            const summScan = mainData.reduce(function (accumulator, currentValue, index, array) {
+                return accumulator + Number(currentValue['Scanned Resi ']);
+            }, 0);
+            const summScannedResi = mainData.reduce(function (accumulator, currentValue, index, array) {
+                return accumulator + Number(currentValue['Scan finished 1= Yes 0= No']);
+            }, 0);
 
-            // filters.innerHTML = `
-            //     <h3>Area resi</h3>
-            //     ${rI}
-            //     <br>
-            //     <h3>Number of units</h3>
-            //     ${uI}
-            // `;
             filters.innerHTML = `
-                <h3>Number of units</h3>
+                <h3>Number of resi <i class="arrow" id="toggleFilters"></i></h3>
                 ${uI}
+                
+                <div><b>Total buildings visited</b>: ${summScan}</div>
+                <div><b>Total scanned resi units</b>: ${summScannedResi}</div>
+
             `;
         }
 
@@ -763,6 +785,12 @@
                                     <div><b>area total</b>: ${point['area total']}</div>
                                     <div><b>area resi</b>: ${point['area resi']}</div>
                                     <div><b>area commercial</b>: ${point['area commercial']}</div>
+
+                                    <h2>Scan information</h2>
+                                    <div><b>Scan Date</b>: ${point['Scan Date']}</div>
+                                    <div><b>Scan Week</b>: ${point['Scan Week']}</div>
+                                    <div><b>Scan Team</b>: ${point['Scan Team']}</div>
+                                    <div><b>scanned resi vs. resi</b>: ${point['scanned resi vs. resi']}</div>
                                 `;
                                 info.innerHTML = description;
                                 openNav()
