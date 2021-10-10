@@ -341,7 +341,14 @@
             z-index: 1000;
             background-color: white;
             padding: 10px;
-            ;
+        }
+        #berlinLyaerToggle {
+            position: absolute;
+            bottom: 65px;
+            left: 5px;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
         }
     </style>
 </head>
@@ -352,12 +359,12 @@
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <div id="info"></div>
     </div>
+    <button class="button" id="berlinLyaerToggle">Berlin layer</button>
 
     <div id="leftBottom"></div>
     <div id="filters" style="height:320px;"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
-        <button class="button" id="berlinLyaerToggle">Berlin layer</button>
         <input id="myInput" type="text" name="myCountry" placeholder="Søk...">
     </div>
     <div id="logo">
