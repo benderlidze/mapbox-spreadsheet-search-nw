@@ -262,8 +262,10 @@
             background-color: white;
             padding: 10px;
             transition: 0.5s;
-            height: 350px;
+            height: 320px;
             overflow: hidden;
+            width: 200px;
+            ;
         }
 
         #info {
@@ -331,6 +333,16 @@
             transform: rotate(-135deg);
             -webkit-transform: rotate(-135deg);
         }
+
+        #leftBottom {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
+            ;
+        }
     </style>
 </head>
 
@@ -341,7 +353,8 @@
         <div id="info"></div>
     </div>
 
-    <div id="filters" style="height:350px;"></div>
+    <div id="leftBottom"></div>
+    <div id="filters" style="height:320px;"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
         <button class="button" id="berlinLyaerToggle">Berlin layer</button>
@@ -353,6 +366,7 @@
 
     <script>
         const GEO = [];
+        const leftBottom = document.getElementById("leftBottom")
         const berlinLyaerToggle = document.getElementById("berlinLyaerToggle")
         const filters = document.getElementById("filters")
         const info = document.getElementById("info")
@@ -366,6 +380,19 @@
             center: { lng: 13.404215965595967, lat: 52.50403625638327 },
             zoom: 9.4
         });
+
+        // Add geolocate control to the map.
+        map.addControl(
+            new mapboxgl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                // When active the map will receive updates to the device's location as it changes.
+                trackUserLocation: true,
+                // Draw an arrow next to the location dot to indicate which direction the device is heading.
+                showUserHeading: true
+            })
+        );
 
         map.on('load', () => {
 
@@ -496,12 +523,12 @@
                 'type': 'symbol',
                 'source': 'pins',
                 'layout': {
-                    'text-field': ['get', 'bygningsnavn'],
+                    'text-field': ['get', 'Adress'],
                     'text-variable-anchor': ['bottom'],
                     'text-radial-offset': 0.5,
                     'text-justify': 'auto',
                 },
-                "filter": ["==", ['get', 'bygningsnavn'], "NULL"] //hide all labels on init 
+                "minzoom": 16,
             });
 
             map.addLayer({
@@ -524,7 +551,8 @@
                     'circle-radius': 5,
                     'circle-color': ['get', 'color'],
                     'circle-opacity': 1
-                }
+                },
+
             });
 
 
@@ -549,7 +577,7 @@
                     <div><b>Scan Date</b>: ${data['Scan Date']}</div>
                     <div><b>Scan Week</b>: ${data['Scan Week']}</div>
                     <div><b>Scan Team</b>: ${data['Scan Team']}</div>
-                    <div><b>scanned resi vs. resi</b>: ${data['scanned resi vs. resi']}</div>
+                    <div><b>Scanned Units</b>: ${data['scanned resi vs. resi']}</div>
                 `;
                 // Ensure that if the map is zoomed out such that multiple
                 // copies of the feature are visible, the popup appears
@@ -562,6 +590,8 @@
                 //     .setLngLat(coordinates)
                 //     .setHTML(description)
                 //     .addTo(map);
+
+                map.setFilter('selected', ["==", ['get', "Adress"], data['Adress']]);
 
                 info.innerHTML = description;
                 openNav()
@@ -582,11 +612,11 @@
             if (e.target.id === "toggleFilters") {
                 const arrow = e.target;
                 console.log('e.target', e.target);
-                if (filters.style.height === "350px") {
+                if (filters.style.height === "320px") {
                     filters.style.height = "16px"
                     arrow.style.transform = "rotate(45deg)";
                 } else {
-                    filters.style.height = "350px";
+                    filters.style.height = "320px";
                     arrow.style.transform = "rotate(-135deg)";
 
                 }
@@ -693,11 +723,11 @@
             filters.innerHTML = `
                 <h3>Number of resi <i class="arrow" id="toggleFilters"></i></h3>
                 ${uI}
-                
-                <div><b>Total buildings visited</b>: ${summScan}</div>
-                <div><b>Total scanned resi units</b>: ${summScannedResi}</div>
-
             `;
+
+            leftBottom.innerHTML = ` <div><b>Total buildings visited</b>: ${summScan}</div>
+                <div><b>Total scanned resi units</b>: ${summScannedResi}</div>
+                `
         }
 
         function update() {
