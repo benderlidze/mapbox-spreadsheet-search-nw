@@ -377,7 +377,7 @@
         <input id="myInput" type="text" name="myCountry" placeholder="Søk...">
     </div>
     <div id="logo">
-        <img src="img/wieso_hvit.png" alt="">
+        <img src="img/wiesologo_black.png" alt="" style="opacity: 0.5;">
     </div>
 
     <script>
@@ -396,7 +396,8 @@
             center: { lng: 13.404215965595967, lat: 52.50403625638327 },
             zoom: 9.4
         });
-
+        // Add zoom and rotation controls to the map.
+        map.addControl(new mapboxgl.NavigationControl());
         // Add geolocate control to the map.
         map.addControl(
             new mapboxgl.GeolocateControl({
@@ -544,7 +545,7 @@
                     'text-radial-offset': 0.5,
                     'text-justify': 'auto',
                 },
-                "minzoom": 16,
+                "minzoom": 15,
             });
 
             map.addLayer({
@@ -662,6 +663,8 @@
             buildFilters(mainData);
             showPins(mainData);
             map.setFilter('selected', ["==", ['get', "Adress"], null]);
+
+            document.getElementById("myInput").value = "";
         })
 
         berlinLyaerToggle.addEventListener("click", () => {
@@ -889,6 +892,8 @@
                                         false
                                     ])
                                 })
+
+                                highlightFilterRow(point["number of resi "])
                             }
 
                         });
