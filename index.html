@@ -8,6 +8,7 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
     <style>
         body {
@@ -451,25 +452,26 @@
             },
             );
 
-            map.addSource('berlin', {
-                type: 'geojson',
-                // Use a URL for the value for the `data` property.
-                data: 'data/berlin.geojson'
-            });
-            // map.addLayer({
-            //     'id': 'berlin',
-            //     'type': 'fill',
-            //     'source': 'berlin', // reference the data source
-            //     'layout': {
-            //         // Make the layer visible by default.
-            //         'visibility': 'visible'
-            //     },
-            //     'paint': {
-            //         'fill-color': "white",
-            //         'fill-opacity': 0.1,
+            fetch("data/berlin.geojson")
+                .then(i => i.json())
+                .then(i => {
 
-            //     }
-            // });
+                    map.getSource("berlin").setData(i)
+
+                    const centers = i.features.map(i => turf.centerOfMass(i, { ...i }))
+                    const collection = turf.featureCollection(centers);
+                    map.getSource("centers").setData(collection)
+                    console.log('collection', collection);
+                })
+
+            map.addSource('berlin', {
+                'type': 'geojson',
+                'data': {
+                    type: "FeatureCollection",
+                    features: []
+                }
+            });
+
             map.addLayer({
                 'id': 'berlin',
                 'type': 'line',
@@ -481,6 +483,27 @@
                     'line-color': 'gray',
                     'line-width': 2
                 },
+            });
+
+            map.addSource('centers', {
+                'type': 'geojson',
+                'data': {
+                    type: "FeatureCollection",
+                    features: []
+                }
+            });
+            map.addLayer({
+                'id': 'centers',
+                'type': 'symbol',
+                'source': 'centers',
+                'layout': {
+                    'text-field': ['get', 'spatial_alias'],
+                    'text-variable-anchor': ['bottom'],
+                    'text-radial-offset': 0.5,
+                    'text-justify': 'auto',
+                    'visibility': "visible"
+                },
+                "minzoom": 10,
             });
 
 
@@ -672,9 +695,11 @@
             console.log('map.getLayer("berlin").visibility', map.getLayer("berlin").visibility);
             if (map.getLayer("berlin").visibility === "visible") {
                 map.setLayoutProperty('berlin', 'visibility', 'none');
+                map.setLayoutProperty('centers', 'visibility', 'none');
             }
             else {
                 map.setLayoutProperty('berlin', 'visibility', 'visible');
+                map.setLayoutProperty('centers', 'visibility', 'visible');
             }
         })
 
