@@ -360,6 +360,15 @@
             background-color: white;
             padding: 10px;
         }
+
+        .mapboxgl-ctrl-bottom-left {
+            bottom: 190px;
+            /* border: 1px solid red; */
+        }
+
+        .mapboxgl-ctrl-logo {
+            display: none;
+        }
     </style>
 </head>
 
@@ -396,10 +405,11 @@
             container: 'map',
             style: 'mapbox://styles/mapbox/light-v9',
             center: { lng: 13.404215965595967, lat: 52.50403625638327 },
-            zoom: 9.4
+            zoom: 9.4,
+            logoPosition: 'bottom-right'
         });
         // Add zoom and rotation controls to the map.
-        map.addControl(new mapboxgl.NavigationControl());
+        const zoom = map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
         // Add geolocate control to the map.
         map.addControl(
             new mapboxgl.GeolocateControl({
@@ -410,7 +420,7 @@
                 trackUserLocation: true,
                 // Draw an arrow next to the location dot to indicate which direction the device is heading.
                 showUserHeading: true
-            })
+            }), 'bottom-left'
         );
 
         map.on('load', () => {
@@ -642,8 +652,10 @@
 
             d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vsAps12s1plHn9UdEpziSP-GbspdhUn7NoAhoJSeYkDcXv2ic_LXfbCfqrEh3w/pub?gid=227206475&single=true&output=csv")
                 .then(data => {
-                    showPins(data);
-                    buildFilters(data)
+
+                    mainData.push(...data)
+                    showPins(mainData);
+                    buildFilters(mainData)
                 })
         })
 
@@ -715,10 +727,11 @@
         function showPins(data) {
 
             console.log('data', data);
+            //mainData.length = 0;
             collection = data.filter(i => i.lat !== "").map(d => {
 
                 d.search = d.Adress
-                mainData.push(d)
+                //                mainData.push(d)
 
                 let color = (+d['Scan finished 1= Yes 0= No'] === 1) ? 'green' : 'red';
 
@@ -752,10 +765,13 @@
             const unitsIntervals = Math.ceil(Math.max(...data.map(i => +i['number of resi '].replace(",", "."))) / 10)
             for (let i = 0; i <= unitsIntervals; i++) {
 
+                // console.log('i', i);
                 const number = mainData.filter(s => {
-                    const val = +s['number of resi '].replace(",", ".")
+                    const val = +s['number of resi ']
                     return val >= (i * 10 + 1) && val <= ((i + 1) * 10)
                 }).length;
+
+                // console.log(i * 10, number);
 
                 let num = `(${number})`;
                 if (number === 0) {
@@ -805,7 +821,7 @@
                 .filter(i => {
                     if (uFilter) {
                         uf = uFilter.value.split(";")
-                        const val = +i['Number of units total'].replace(",", ".")
+                        const val = +i["number of resi "]
                         return val >= uf[0] && val <= uf[1];
                     }
                     return i
