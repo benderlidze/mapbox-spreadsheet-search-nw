@@ -104,13 +104,12 @@
 
 
         .selected {
-
             filter: grayscale(0%)
         }
 
         #logo {
             position: absolute;
-            z-index: 1000;
+            z-index: 1200;
             bottom: 0px;
             right: 0px;
             padding: 20px;
@@ -260,7 +259,7 @@
             position: absolute;
             top: 80px;
             left: 20px;
-            z-index: 1000;
+            z-index: 999;
             background-color: white;
             padding: 10px;
             transition: 0.5s;
@@ -270,6 +269,7 @@
 
         #info {
             padding: 10px;
+            z-index: 1100;
         }
 
         .sidenav {
@@ -283,6 +283,7 @@
             overflow-x: hidden;
             transition: 0.5s;
             padding-top: 60px;
+            z-index: 1200;
         }
 
         .sidenav a {
@@ -355,7 +356,8 @@
             background-color: white;
             padding: 10px;
         }
-        #berlinLyaerToggle:hover{
+
+        #berlinLyaerToggle:hover {
             background-color: #eeeeee;
         }
 
@@ -367,11 +369,12 @@
             background-color: white;
             padding: 10px;
         }
-        #resetButton:hover{
+
+        #resetButton:hover {
             background-color: #eeeeee;
         }
 
-        #leftBottom{
+        #leftBottom {
             border: 2px solid rgb(207, 207, 207);
             border-radius: 5px;
         }
@@ -1023,7 +1026,11 @@
         }
 
         function openNav() {
-            document.getElementById("mySidenav").style.width = "300px";
+            let width = "300px"
+            if (window.innerWidth <= 768) {
+                width = "100%"
+            }
+            document.getElementById("mySidenav").style.width = width;
         }
 
         function closeNav() {
