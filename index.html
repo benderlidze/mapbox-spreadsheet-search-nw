@@ -318,7 +318,11 @@
 
         .button {
             margin: 10px 0px;
+            border: 2px solid rgb(207, 207, 207);
+            border-radius: 5px;
+            cursor: pointer;
         }
+
 
 
         .arrow {
@@ -345,24 +349,30 @@
 
         #berlinLyaerToggle {
             position: absolute;
-            bottom: 65px;
+            bottom: 60px;
             left: 5px;
             z-index: 1000;
             background-color: white;
             padding: 10px;
+        }
+        #berlinLyaerToggle:hover{
+            background-color: #eeeeee;
         }
 
         #resetButton {
             position: absolute;
-            bottom: 125px;
+            bottom: 105px;
             left: 5px;
             z-index: 1000;
             background-color: white;
             padding: 10px;
         }
+        #resetButton:hover{
+            background-color: #eeeeee;
+        }
 
         .mapboxgl-ctrl-bottom-left {
-            bottom: 190px;
+            bottom: 150px;
             /* border: 1px solid red; */
         }
 
@@ -379,10 +389,10 @@
         <div id="info"></div>
     </div>
     <button class="button" id="resetButton">Reset</button>
-    <button class="button" id="berlinLyaerToggle">Berlin layer</button>
+    <button class="button" id="berlinLyaerToggle">District layer</button>
 
     <div id="leftBottom"></div>
-    <div id="filters" style="height:330px;"></div>
+    <div id="filters" style="height:290px;"></div>
     <div id="map"></div>
     <div class="autocomplete" style="width:300px;">
         <input id="myInput" type="text" name="myCountry" placeholder="Søk...">
@@ -665,11 +675,11 @@
             if (e.target.id === "toggleFilters") {
                 const arrow = e.target;
                 console.log('e.target', e.target);
-                if (filters.style.height === "330px") {
+                if (filters.style.height === "290px") {
                     filters.style.height = "16px"
                     arrow.style.transform = "rotate(45deg)";
                 } else {
-                    filters.style.height = "330px";
+                    filters.style.height = "290px";
                     arrow.style.transform = "rotate(-135deg)";
                 }
             }
@@ -764,6 +774,9 @@
 
             const unitsIntervals = Math.ceil(Math.max(...data.map(i => +i['number of resi '].replace(",", "."))) / 10)
             for (let i = 0; i <= unitsIntervals; i++) {
+
+                console.log('i', i);
+                if (i === 13) { continue; }
 
                 // console.log('i', i);
                 const number = mainData.filter(s => {
