@@ -606,7 +606,7 @@
                 'source': 'pins',
                 'paint': {
                     'circle-radius': 8,
-                    'circle-color': 'blue',
+                    'circle-color': 'orange',
                     'circle-opacity': 1
                 },
                 "filter": ["==", ['get', 'bygningsnavn'], "NULL"] //hide all labels on init 
@@ -633,21 +633,7 @@
                 var coordinates = e.features[0].geometry.coordinates.slice();
                 var data = e.features[0].properties;
 
-                const description = `
-                    <h1>${data['Adress']}</h1>
-                    <div><b>Number of units total</b>: ${data['Number of units total']}</div>
-                    <div style="background-color:yellow"><b>Number of resi </b>: ${data["number of resi "]}</div>
-                    <div><b>number of commercial</b>: ${data['number of commercial']}</div>
-                    <div><b>area total</b>: ${data['area total']}</div>
-                    <div><b>area resi</b>: ${data['area resi']}</div>
-                    <div><b>area commercial</b>: ${data['area commercial']}</div>
-
-                    <h2>Scan information</h2>
-                    <div><b>Scan Date</b>: ${data['Scan Date']}</div>
-                    <div><b>Scan Week</b>: ${data['Scan Week']}</div>
-                    <div><b>Scan Team</b>: ${data['Scan Team']}</div>
-                    <div><b>Scanned Units</b>: ${data['scanned resi vs. resi']}</div>
-                `;
+                const description = getDescr(data)
                 // Ensure that if the map is zoomed out such that multiple
                 // copies of the feature are visible, the popup appears
                 // over the copy being pointed to.
@@ -852,6 +838,28 @@
             showPins(data);
         }
 
+        function getDescr(data) {
+            const description = `
+                    <h1>${data['Adress']}</h1>
+                    <div><b>Number of units total</b>: ${data['Number of units total']}</div>
+                    <div style="background-color:yellow"><b>Number of resi </b>: ${data["number of resi "]}</div>
+                    <div><b>number of commercial</b>: ${data['number of commercial']}</div>
+                    <div><b>area total</b>: ${data['area total']}</div>
+                    <div><b>area resi</b>: ${data['area resi']}</div>
+                    <div><b>area commercial</b>: ${data['area commercial']}</div>
+                    <div><b>Number of Staircases</b>: ${data['Numbers of staircases']}</div>
+                    <div><b>Help Team</b>: ${data['Help Team']}</div>
+                    <div><b>Wieso ID</b>: ${data['Wieso ID']}</div>
+
+                    <h2>Scan information</h2>
+                    <div><b>Scan Date</b>: ${data['Scan Date']}</div>
+                    <div><b>Scan Week</b>: ${data['Scan Week']}</div>
+                    <div><b>Scan Team</b>: ${data['Scan Team']}</div>
+                    <div><b>Scanned Units</b>: ${data['scanned resi vs. resi']}</div>
+                `;
+            return description;
+        }
+
         function autocomplete(inp, data) {
             /*the autocomplete function takes two arguments,
             the text field element and an array of possible autocompleted values:*/
@@ -878,7 +886,7 @@
                 for (i = 0; i < arr.length; i++) {
 
                     /*check if the item starts with the same letters as the text field value:*/
-                    if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                    if (arr[i] && arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
                         /*create a DIV element for each matching element:*/
                         b = document.createElement("DIV");
                         /*make the matching letters bold:*/
@@ -900,21 +908,7 @@
                             if (point) {
 
 
-                                const description = `
-                                    <h1>${point['Adress']}</h1>
-                                    <div><b>Number of units total</b>: ${point['Number of units total']}</div>
-                                    <div style="background-color:yellow"><b>Number of resi </b>: ${point["number of resi "]}</div>
-                                    <div><b>number of commercial</b>: ${point['number of commercial']}</div>
-                                    <div><b>area total</b>: ${point['area total']}</div>
-                                    <div><b>area resi</b>: ${point['area resi']}</div>
-                                    <div><b>area commercial</b>: ${point['area commercial']}</div>
-
-                                    <h2>Scan information</h2>
-                                    <div><b>Scan Date</b>: ${point['Scan Date']}</div>
-                                    <div><b>Scan Week</b>: ${point['Scan Week']}</div>
-                                    <div><b>Scan Team</b>: ${point['Scan Team']}</div>
-                                    <div><b>scanned resi vs. resi</b>: ${point['scanned resi vs. resi']}</div>
-                                `;
+                                const description = getDescr(point)
                                 info.innerHTML = description;
                                 openNav()
 
